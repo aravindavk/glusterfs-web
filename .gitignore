@@ -1,0 +1,4 @@
+*.pyc
+build/*
+dist/*
+src/GlusterFS_Web.egg-info/*
