@@ -14,7 +14,7 @@ setup(
     package_dir = {"": "src"},
     packages = ["glusterfsweb"],
     include_package_data = True,
-    install_requires = ['argparse', 'requests', 'flask'],
+    install_requires = ['argparse', 'requests', 'flask', 'gevent-websocket'],
 
     entry_points = {
         "console_scripts": [
