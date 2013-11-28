@@ -28,11 +28,9 @@ class GlusterNodeStateError(Exception):
 
 def _get_args():
     parser = argparse.ArgumentParser(description='Handle GlusterFS state')
-    parser.add_argument('event')
+    parser.add_argument('event', nargs="?", default="")
     parser.add_argument('--volname', type=str, help='volume name')
-    parser.add_argument('--first', type=str, help='Dont know yet')
-    parser.add_argument('--last', type=str, help='Dont know yet')
-    return parser.parse_args()
+    return parser.parse_known_args()
 
 
 def glusterfsevent(name):
@@ -182,10 +180,10 @@ def volume_stop(volume):
 def main():
     args = _get_args()
 
-    if not args.event in ["setup", "cleanup"]:
+    if getattr(args, "event", None) and not args.event in ["setup", "cleanup"]:
         _db.connect(DB_FILE)
 
-    if args.event in _glusterfs_events_funcs:
+    if getattr(args, "event", None) and args.event in _glusterfs_events_funcs:
         _glusterfs_events_funcs[args.event](args.volname)
 
 
