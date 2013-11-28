@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html ng-app>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>GlusterWeb - Personal GlusterFS monitoring system</title>
+    <link rel="stylesheet" href="/static/app.css"/>
+    <script src="/static/angular.min.js"></script>
+    <script src="/static/app.js"></script>
+  </head>
+  <body>
+    <div class="experimental-note">Experimental project, not for production use!</div>
+    <div class="header">
+      <div class="container">
+        <span class="logo-gluster-text">GLUSTER</span><span class="logo-web-text">WEB</span>
+      </div>
+    </div>
+    <div class="container">
+      <div ng-controller="VolumeListCtrl">
+        <table class="volumes-list">
+          <thead>
+            <tr><th class="c1">Name</th><th class="c2">Type</th><th class="c3">Status</th><th class="c4">Number of Bricks</th></tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="volume in volumes" ng-class="volume.status == 'UP' ? 'green-row': 'red-row'">
+              {% raw %}
+              <td class="c1">{{volume.name}}</td>
+              <td class="c2">{{volume.type}}</td>
+              <td class="c3">{{volume.status}}</td>
+              <td class="c4">{{volume.num_bricks}}</td>
+              {% endraw %}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+    <script>
+     ws = new WebSocket("ws://" + document.domain + ":{{ port }}/watch");
+     ws.onmessage = function (msg) {
+       ws_on_msg(msg);
+     };
+    </script>
+  </body>
+</html>

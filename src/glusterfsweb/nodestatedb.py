@@ -18,6 +18,17 @@ def connect(db_file):
     cursor = conn.cursor()
 
 
+def get_volumes():
+    volumes = []
+    query = "SELECT name, type, status, num_bricks FROM volumes"
+    for row in cursor.execute(query):
+        volumes.append({"name": row[0],
+                        "type": row[1],
+                        "status": row[2],
+                        "num_bricks": row[3]})
+    return volumes
+
+
 def table_cleanup_volumes(volume=None):
     query = "DELETE FROM volumes"
 

@@ -11,14 +11,12 @@ import errno
 import os
 from functools import wraps
 import sys
+import requests
 
 from glusterfstools import volumes
 import nodestatedb as _db
+from config import DB_PATH, DB_FILE, HOOKS_ROOT
 
-
-DB_PATH = "/var/lib/glusterd/nodestate/"
-DB_FILE = DB_PATH + "glusternodestate.db"
-HOOKS_ROOT = "/var/lib/glusterd/hooks/1/"
 _glusterfs_events_funcs = {}
 
 
@@ -28,7 +26,7 @@ class GlusterNodeStateError(Exception):
 
 def _get_args():
     parser = argparse.ArgumentParser(description='Handle GlusterFS state')
-    parser.add_argument('event', nargs="?", default="")
+    parser.add_argument('event')
     parser.add_argument('--volname', type=str, help='volume name')
     return parser.parse_known_args()
 
@@ -109,14 +107,13 @@ def flush_and_regenerate(param=None):
 @glusterfsevent("create")
 def volume_create(volume):
     vol_data = volumes.get(volume)
-    vol_data = vol_data[0]
-    vol = (vol["uuid"],
-           vol["name"],
-           vol["type"],
-           vol["status"],
-           vol["num_bricks"],
-           vol["transport"])
-
+    vol = vol_data[0]
+    vols = (vol["uuid"],
+            vol["name"],
+            vol["type"],
+            vol["status"],
+            vol["num_bricks"],
+            vol["transport"])
     _db.volumes_add([vols])
     bricks = []
     for brick in vol['bricks']:
@@ -178,13 +175,24 @@ def volume_stop(volume):
 
 
 def main():
-    args = _get_args()
+    args = _get_args()[0]
 
-    if getattr(args, "event", None) and not args.event in ["setup", "cleanup"]:
+    if not args.event in ["setup", "cleanup"]:
         _db.connect(DB_FILE)
 
-    if getattr(args, "event", None) and args.event in _glusterfs_events_funcs:
+    if args.event in _glusterfs_events_funcs:
         _glusterfs_events_funcs[args.event](args.volname)
+
+    url_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "data",
+                            "url")
+
+    try:
+        with open(url_file) as f:
+            url = "%s/%s" % (f.read(), args.event)
+            print requests.get(url)
+    except (IOError, OSError, requests.exceptions.RequestException):
+        pass
 
 
 if __name__ == "__main__":

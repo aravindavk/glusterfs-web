@@ -14,7 +14,7 @@ setup(
     package_dir = {"": "src"},
     packages = ["glusterfsweb"],
     include_package_data = True,
-    install_requires = ['argparse'],
+    install_requires = ['argparse', 'requests', 'flask'],
 
     entry_points = {
         "console_scripts": [
